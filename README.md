@@ -1,1 +1,1 @@
-# Software_Carpentry_Lazor_Project
+# software_carpentry_lazor_project
