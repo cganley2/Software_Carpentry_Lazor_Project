@@ -42,9 +42,11 @@ class Lazor_solver:
         self.lasers = lasers
         self.points = points
         self.path = [[(lasers[i][0], lasers[i][1])]
-                     for i in range(len(lasers))]
+                     for i in range(len(lasers))] # the laser location and not direction x,y
         self.playGrid = playGrid
+        self.c_lasers = [[1,0,0,0]]
         self.extend_lazor()
+        
 
     # extend_lazor
     def extend_lazor(self):
@@ -53,28 +55,38 @@ class Lazor_solver:
         positions and velocities. Laser paths are represented by a '1' in the
         playGrid
         '''
-        for i in range(len(self.lasers)):
-            self.velocity = [self.lasers[i][2], self.lasers[i][3]]
-            self.current_point = self.path[i][0]
+        l_i = -1 #laser index
+        while (
+            self.c_lasers != [[0,0,0,0]] and
+            l_i <= len(self.lasers) -1
+            ):
+            l_i += 1 #everytime laser gets out of bound, add 1 to go to next laser
+            print(f"we are at l_i: {l_i}")
+            self.velocity = [self.lasers[l_i][2], self.lasers[l_i][3]]
+            self.path = [[(lasers[i][0], lasers[i][1])]
+                     for i in range(len(lasers))]
+            self.current_point = self.path[l_i][0] #for each laser i, always starting the source of laser [0].
+            print(f"calculating for laser {self.lasers[l_i]}")
 
             while (
                 self.current_point[0] < (len(self.playGrid) - 1) and
                 self.current_point[1] < (len(self.playGrid) - 1) and
                 self.current_point[0] > 0 and
                 self.current_point[1] > 0
-            ):
-                self.current_point = np.add(self.current_point, self.velocity)
+            ): # if/while within board
+                if self.lasers[l_i] not in self.c_lasers:
+                    self.current_point = np.add(self.current_point, self.velocity) #current point + up in velocity direction, always add vx and vy to point messes up new c_laser placement
                 # need block collision checker call here
                 # if yes, decide what to do
-                self.path[i].append(tuple(self.current_point))
+                self.path[l_i].append(tuple(self.current_point)) #append new point to path
                 self.playGrid[self.current_point[1]
                               ][self.current_point[0]] = '1'
-                self.collision_checker()
+                self.collision_checker(i_laser=self.lasers[l_i]) # this updates position
 
         for i in self.playGrid:
             print(i)
 
-    def collision_checker(self):
+    def collision_checker(self, i_laser):
         '''
         This function checks if the laser has hit a block and adjusts its path
         accordingly
@@ -84,11 +96,11 @@ class Lazor_solver:
             self.current_point[1] < (len(self.playGrid) - 1)
         ):
             left = self.playGrid[self.current_point[1]
-                                 ][self.current_point[0] + 1]
+                                 ][self.current_point[0] - 1]
             top = self.playGrid[self.current_point[1] -
                                 1][self.current_point[0]]
             right = self.playGrid[self.current_point[1]
-                                  ][self.current_point[0] - 1]
+                                  ][self.current_point[0] + 1]
             bottom = self.playGrid[self.current_point[1] +
                                    1][self.current_point[0]]
 
@@ -113,8 +125,36 @@ class Lazor_solver:
                     self.velocity[1] = -1 * self.velocity[1]
                 elif top is 'B':
                     self.current_point = (len(self.playGrid) + 1, 0)
-                else:
-                    pass
+                else: # TRYING TO FIX C: new laser created will ALWAYS start at C by definition: WILL have to automate C reflection
+                    print(self.lasers)
+                    if i_laser in self.c_lasers:
+                        print("oi")
+                        self.velocity[1] = -1 * self.velocity[1]
+                        self.c_lasers = [[0,0,0,0]]
+
+                    else:
+                        print(f"i_laser is {i_laser}")
+                        print(f"Running {self.lasers} Nothing is in c_lasers ")
+                        self.lasers.append(
+                            [
+                                self.current_point[0],
+                                self.current_point[1],
+                                self.velocity[0],
+                                self.velocity[1]
+                            ]
+                        )
+                        self.c_lasers.pop()  # remove current c_laser & replace
+                        self.c_lasers.append(
+                            [
+                                self.current_point[0],
+                                self.current_point[1],
+                                self.velocity[0],
+                                self.velocity[1]
+                            ]
+                        )
+                    print(self.c_lasers)
+                    pass #We are going to create a new laser and make the old one pass through C
+                    print(self.lasers) 
             # RIGHT check
             elif right in {'A', 'B', 'C'}:
                 if right is 'A':
@@ -122,7 +162,44 @@ class Lazor_solver:
                 elif right is 'B':
                     self.current_point = (len(self.playGrid) + 1, 0)
                 else:
-                    pass
+                    print(self.lasers)
+                    print(self.lasers[-1])
+                    if i_laser in self.c_lasers: #ROBUST
+                        print("c is on right but we have already went through c")
+                        self.velocity[1] = -1 * self.velocity[1]
+                        self.c_lasers = [[0,0,0,0]]
+                    elif [self.lasers[-1]] == self.c_lasers:
+                        print("Passed through C-block, now getting out")  # NEED to change for more lasers
+                        #self.current_point = np.add(self.current_point, self.velocity) #moving back because the while loop will move us forward
+                        pass
+
+
+                    else:
+                        print(f"i_laser is {i_laser}")
+                        print(f"Running {self.lasers} Nothing is in c_lasers ")
+                        self.lasers.append(
+                            [
+                                self.current_point[0],
+                                self.current_point[1],
+                                self.velocity[0],
+                                self.velocity[1]
+                            ]
+                        )
+                        self.c_lasers.pop()  # remove current c_laser & replace
+                        self.c_lasers.append(
+                            [
+                                self.current_point[0],
+                                self.current_point[1],
+                                self.velocity[0],
+                                self.velocity[1]
+                            ]
+                        )
+                    print(self.c_lasers)
+                    pass #We are going to create a new laser and make the old one pass through C
+                    print(self.lasers) 
+                    print("c on right")
+                    
+
             # BOTTOM check
             elif bottom in {'A', 'B', 'C'}:
                 if bottom is 'A':
@@ -135,7 +212,7 @@ class Lazor_solver:
 
 if __name__ == "__main__":
     board, blocks, lasers, points, playGrid = rib.board_interpretor(
-        rib.read_bff_file("../mad_1"), verbose=True)
+        rib.read_bff_file("mad_1"), verbose=True)
     playGrid[3][7] = 'A'
     playGrid[1][5] = 'C'
     lazor = Lazor_solver(board, blocks, lasers, points, playGrid)
