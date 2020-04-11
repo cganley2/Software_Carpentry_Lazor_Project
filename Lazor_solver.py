@@ -96,7 +96,7 @@ class Lazor_solver:
                 print(i)
         
     def is_valid(self, move): # works
-        if ((move[0] < (len(self.playGrid) - 1)) and (move[1] < (len(self.playGrid) - 1)) and (move[0] > 0 and move[1] > 0)):
+        if ((move[0] < (len(self.playGrid) - 1)) and (move[1] < (len(self.playGrid) - 1)) and (move[0] >= 0 and move[1] >= 0)):
             return True 
         else:
             print("outta bound")
