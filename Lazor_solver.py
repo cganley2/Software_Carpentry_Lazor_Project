@@ -44,7 +44,8 @@ class Lazor_solver:
         self.path = [[(lasers[i][0], lasers[i][1])]
                      for i in range(len(lasers))]
         self.playGrid = playGrid
-        self.extend_lazor()
+        self.flat = [item for sublist in self.board for item in sublist]
+        # self.extend_lazor()
 
     # extend_lazor
     def extend_lazor(self):
@@ -58,8 +59,8 @@ class Lazor_solver:
             self.current_point = self.path[i][0]
 
             while (
-                self.current_point[0] < (len(self.playGrid) - 1) and
-                self.current_point[1] < (len(self.playGrid) - 1) and
+                self.current_point[0] <= (len(self.playGrid[0])) and
+                self.current_point[1] <= (len(self.playGrid)) and
                 self.current_point[0] > 0 and
                 self.current_point[1] > 0
             ):
@@ -69,19 +70,19 @@ class Lazor_solver:
                 self.path[i].append(tuple(self.current_point))
                 self.playGrid[self.current_point[1]
                               ][self.current_point[0]] = '1'
+                print(self.current_point[1], self.current_point[0])
                 self.collision_checker()
-
-        for i in self.playGrid:
-            print(i)
 
     def collision_checker(self):
         '''
         This function checks if the laser has hit a block and adjusts its path
         accordingly
         '''
+        # NEED TO CHANGE WHAT CHECKER LOOKS AT ON EVERY STEP. DON'T NEED TO
+        # LOOK AT ALL 4 POSITIONS OR ELSE IT GETS CONFUSED
         if (
-            self.current_point[0] < (len(self.playGrid) - 1) and
-            self.current_point[1] < (len(self.playGrid) - 1)
+            self.current_point[0] <= (len(self.playGrid[0]) - 1) and
+            self.current_point[1] <= (len(self.playGrid) - 1)
         ):
             left = self.playGrid[self.current_point[1]
                                  ][self.current_point[0] + 1]
@@ -94,11 +95,11 @@ class Lazor_solver:
 
             # check if hit movable block on LEFT side
             if left in {'A', 'B', 'C'}:
-                if left is 'A': # change laser velocity
+                if left is 'A':  # change laser velocity
                     self.velocity[0] = -1 * self.velocity[0]
-                elif left is 'B': # set position arbitrarily out of bounds
-                    self.current_point = (len(self.playGrid) + 1, 0)
-                else: # can't figure out how to account for C blocks
+                elif left is 'B':  # set position arbitrarily out of bounds
+                    self.current_point = (99, 99)
+                else:  # can't figure out how to account for C blocks
                     self.lasers.append(
                         [
                             self.current_point[1],
@@ -112,15 +113,16 @@ class Lazor_solver:
                 if top is 'A':
                     self.velocity[1] = -1 * self.velocity[1]
                 elif top is 'B':
-                    self.current_point = (len(self.playGrid) + 1, 0)
+                    self.current_point = (99, 99)
                 else:
                     pass
             # RIGHT check
             elif right in {'A', 'B', 'C'}:
+                print(right)
                 if right is 'A':
                     self.velocity[0] = -1 * self.velocity[0]
                 elif right is 'B':
-                    self.current_point = (len(self.playGrid) + 1, 0)
+                    self.current_point = (99, 99)
                 else:
                     pass
             # BOTTOM check
@@ -128,15 +130,15 @@ class Lazor_solver:
                 if bottom is 'A':
                     self.velocity[1] = -1 * self.velocity[1]
                 elif bottom is 'B':
-                    self.current_point = (len(self.playGrid) + 1, 0)
+                    self.current_point = (99, 99)
                 else:
                     pass
 
 
 if __name__ == "__main__":
     board, blocks, lasers, points, playGrid = rib.board_interpretor(
-        rib.read_bff_file("../mad_1"), verbose=True)
-    playGrid[3][7] = 'A'
-    playGrid[1][5] = 'C'
+        rib.read_bff_file("../showstopper_4"), verbose=True)
+    # playGrid[3][7] = 'A'
+    # playGrid[1][5] = 'C'
     lazor = Lazor_solver(board, blocks, lasers, points, playGrid)
     print(lazor.path)
