@@ -107,12 +107,12 @@ def board_interpretor(board_information, verbose=False):
             points.append(tuple(list(map(int, each_line.split()[1:]))))
 
     board_layout = board_layout[1:]  # Remove Grid start that was appended
-    playGrid = [["-" for i in range(2 * len(board_layout) + 1)]
-                for j in range(2 * len(board_layout) + 1)]
+    playGrid = [["-" for col in range(2 * len(board_layout[0]) + 1)]
+                for row in range(2 * len(board_layout) + 1)]
 
-    for i in range(len(board_layout)):
-        for j in range(len(board_layout)):
-            playGrid[2 * j + 1][2 * i + 1] = board_layout[i][j]
+    for row in range(len(board_layout)):
+        for col in range(len(board_layout[row])):
+            playGrid[2 * row + 1][2 * col + 1] = board_layout[row][col]
 
     for i in points:
         playGrid[i[1]][i[0]] = "P"
@@ -135,7 +135,7 @@ def board_interpretor(board_information, verbose=False):
 
 
 if __name__ == "__main__":
-    board_interpretor(read_bff_file("../mad_1"), verbose=True)
+    board_interpretor(read_bff_file("../numbered_6"), verbose=True)
     print('this is from read and interpret')
 
 # ok
