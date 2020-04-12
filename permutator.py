@@ -59,6 +59,11 @@ def generator(playGrid, all_block_type):
         for j in i:
             perm_list.append(j)
 
+    for i in range(len(perm_list)):
+        for j in perm_list[i]:
+            print(j)
+        print('\n')
+
     return perm_list
     #[[A_populated grids from B_populated template 1],[A_populated grids from B_populated template 2],[A_populated grids from B_populated template 3]]
     # TODO: #Not sure how to handle a 3rd block type unless we can change A_populated_grid to a list of grids.
@@ -88,15 +93,16 @@ def permutator(lazor):
     # Have to make a list of permu, not list of lists of grids (Sorry if that's confusing)
     reducedPermutations = generator(lazor.playGrid, lazor.block_types)
 
-    for perm in reducedPermutations:
+    for playGridPerm in reducedPermutations:
         permIndex = 0
         board_test = copy.deepcopy(lazor)
+        board_test.playGrid = playGridPerm
         # place the blocks according to the permutation tuple order
-        for rowIndex in range(1, len(board_test.playGrid), 2):
-            for colIndex in range(1, len(board_test.playGrid[rowIndex]), 2):
-                if board_test.playGrid[rowIndex][colIndex] is 'o':
-                    board_test.playGrid[rowIndex][colIndex] = perm[permIndex]
-                    permIndex += 1
+        # for rowIndex in range(1, len(board_test.playGrid), 2):
+        #     for colIndex in range(1, len(board_test.playGrid[rowIndex]), 2):
+        #         if board_test.playGrid[rowIndex][colIndex] is 'o':
+        #             board_test.playGrid[rowIndex][colIndex] = perm[permIndex]
+        #             permIndex += 1
         print('before')
         for i in board_test.playGrid:
             print(i)
@@ -110,3 +116,5 @@ def permutator(lazor):
 
         if win is True:
             break
+    if win is not True:
+        print('could not find solution')

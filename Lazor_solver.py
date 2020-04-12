@@ -1,5 +1,6 @@
 import read_and_interpret_board as rib
 import numpy as np
+from copy import deepcopy
 # Current Problems: laser.x and .y don't eveolve at same rate as laser.position. Should I just make laser.x/y constant?
 #.x and .y updated during laser.move() but not during laser pop
 # When laser changes, .x and .y are not updated
@@ -56,8 +57,9 @@ class Lazor_solver:
     def solver(self):
         # Has to be up here otherwise we are re-storing all lases in while loop each time
         all_lasers = [Laser(each_laser) for each_laser in self.lasers]
+        C_collision = None
+        # print(all_lasers)
         while len(all_lasers) > 0:
-
             # Updates the current laser must be relating to all_laser list we defined above
             current_laser = all_lasers[0]
             current_laser.x = current_laser.position[0]
@@ -66,7 +68,7 @@ class Lazor_solver:
             #current_grid = Play_Grid
             print(f"current laser: {current_laser}")
 
-            while current_laser.position[0] <= (len(self.playGrid) - 1) and \
+            while current_laser.position[0] <= (len(self.playGrid[0]) - 1) and \
                     current_laser.position[1] <= (len(self.playGrid) - 1):
                 # TODO
                 # print(type(current_laser))
@@ -83,7 +85,14 @@ class Lazor_solver:
                     # returns true if there is collision aka right,left,top,bottom in [a,b,c]
                     if check:
                         # Rotates the laser AND moves out. This is incase B kicks you out
-                        current_laser.collide(block_type, direction)
+                        C_collision = current_laser.collide(block_type, direction)
+                        if C_collision is not None:
+                            print("zabadoo")
+                            print(C_collision.velocity)
+                            self.playGrid[C_collision.y][C_collision.x] = "1"
+                            self.playGrid[C_collision.y - C_collision.vy][C_collision.x - C_collision.vx] = "1"
+                            # self.playGrid[C_collision.start[1]][C_collision.start[0]] = "1"
+                        # current_laser.move()
                         # There is no need for a is_valid check for next move because next move after collision is ALWAYS valid
                         # Except B which will ideally break the while loop
                         # laser.path.append(laser.position)# Now add your new point to path
@@ -96,7 +105,7 @@ class Lazor_solver:
                                       ][current_laser.x] = "1"
                         # laser.path.append(laser.position)
                 else:  # If next move is invalid. Eg you hit B or you go outside.
-                    current_laser.move()
+                    # current_laser.move()
                     self.playGrid[current_laser.position[1]
                                   ][current_laser.position[0]] = "1"
                     print(len(all_lasers))
@@ -109,15 +118,67 @@ class Lazor_solver:
             for i in self.playGrid:
                 print(i)
 
+        if C_collision is not None:
+            current_laser = C_collision
+            current_laser.x = current_laser.position[0]
+            current_laser.y = current_laser.position[1]
+            # Once laser popped (cos met B or went outside, current laser should come bak here)
+            #current_grid = Play_Grid
+            print(f"current laser: {current_laser}")
+
+            while current_laser.position[0] <= (len(self.playGrid[0]) - 1) and \
+                    current_laser.position[1] <= (len(self.playGrid) - 1):
+                # TODO
+                # print(type(current_laser))
+                next_move = np.add(current_laser.position,
+                                   current_laser.velocity)
+                print(f"current pos: {list(current_laser.position)}")
+                print(f"next move is: {next_move}")
+                # checking if next move is in grid. No need to check later.
+                if self.is_valid(next_move):
+                    # TODO: Laser should immediately move, an edge case is if next_move is a block. Overaccounted for this edge case.
+                    # TODO 2: Laser should immediately move, otherwise edge case where laer stats at edge will check everywhere and index erro will ovvur
+                    check, direction, block_type = self.collision_check(
+                        current_laser)  # tuple of Bool and type of block
+                    # returns true if there is collision aka right,left,top,bottom in [a,b,c]
+                    if check:
+                        # Rotates the laser AND moves out. This is incase B kicks you out
+                        C_collision = current_laser.collide(block_type, direction)
+                        # current_laser.move()
+                        # There is no need for a is_valid check for next move because next move after collision is ALWAYS valid
+                        # Except B which will ideally break the while loop
+                        # laser.path.append(laser.position)# Now add your new point to path
+                        self.playGrid[current_laser.y][current_laser.x] = "1"
+                    else:  # no collision, move is valid
+                        current_laser.move()
+                        print("laser moved uninterrupted")
+                        # pseudocode
+                        self.playGrid[current_laser.y
+                                      ][current_laser.x] = "1"
+                        # laser.path.append(laser.position)
+                else:  # If next move is invalid. Eg you hit B or you go outside.
+                    # current_laser.move()
+                    self.playGrid[current_laser.position[1]
+                                  ][current_laser.position[0]] = "1"
+                    # print(len(all_lasers))
+                    # From the list of Laser OBject we created
+                    # all_lasers.pop(0)
+                    # print("POP POP!")
+                    # print(f"Number of lasers left: {len(all_lasers)}")
+                    break
+                # Go to next laser. break or not
+            for i in self.playGrid:
+                print(i)
+
+
     def is_valid(self, move):  # works
         if (
-            (move[0] < (len(self.playGrid[0]) - 1)) and
-            (move[1] < (len(self.playGrid) - 1)) and
+            (move[0] <= (len(self.playGrid[0]) - 1)) and
+            (move[1] <= (len(self.playGrid) - 1)) and
             (move[0] >= 0 and move[1] >= 0)
         ):
             return True
         else:
-            # print("outta bound")
             False
 
     def collision_check(self, current_laser):  # New one
@@ -166,7 +227,6 @@ class Lazor_solver:
                                               1][current_laser.x]}
             directions.append(top)
             directions.append(bottom)
-        print(directions)
 
         # check if there is an adjacent A,B or C block #EDGE CASE, laser in left AND right
         for each_direction in directions:
@@ -237,14 +297,30 @@ class Laser():
             # make it go out of bounds #Make playGrid a parameter of laser or object TODO change to a better check
             self.position = (1000 + 1, 0)
 
-        else:
-            lasers.append(self)  # Saving for later TODO might bump into itself
+        elif block_type == "C":
+            new_laser_obj = deepcopy(self)
+            new_laser_obj.move()
+            new_laser_obj.move()
+            new_laser_obj.start = (self.x, self.y)
+            new_laser_obj.position = [new_laser_obj.x, new_laser_obj.y]
+            print('collide C collision')
+            # new_laser_obj.move()
+            # new_laser_obj.move()
+            print(str(self))
+            print(new_laser_obj.start)
+            # new_laser = [
+            #             new_laser_obj.x,
+            #             new_laser_obj.y,
+            #             new_laser_obj.vx,
+            #             new_laser_obj.vy
+            #             ]
+            # lazor.lasers.append(new_laser)  # Saving for later TODO might bump into itself
             self.transform(direction)
             # Should probably check collision before moving
             # np.add(self.position, self.velocity) # Pass thru the block.
             self.move()
             # This new laser should collide and move one step. So that the time we handle the laser it will be away from C
-            return
+            return new_laser_obj
 
     def transform(self, direction):
         # transform() updates ONLY the velocity of a laser, periodt.
