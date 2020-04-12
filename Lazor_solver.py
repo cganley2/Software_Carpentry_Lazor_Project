@@ -68,6 +68,9 @@ class Lazor_solver:
             #current_grid = Play_Grid
             print(f"current laser: {current_laser}")
 
+            if current_laser.position[0] > len(self.playGrid):
+                all_lasers.pop(0)
+
             while current_laser.position[0] <= (len(self.playGrid[0]) - 1) and \
                     current_laser.position[1] <= (len(self.playGrid) - 1):
                 # TODO

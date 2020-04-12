@@ -95,7 +95,7 @@ def board_interpretor(board_information, verbose=False):
                     else:
                         # print(i)
                         board_layout.append(i.split())
-        elif each_line[0].lower() in ["a", "b", "c"]:
+        elif each_line[0].lower() in ["a", "b", "c"] and each_line[2].isdigit():
             if each_line in board_layout:
                 pass  # Make sure board with
                 # letters does not go in this list e.g: B o o
