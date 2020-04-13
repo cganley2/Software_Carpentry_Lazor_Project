@@ -4,9 +4,9 @@ from permutator import permutator
 
 if __name__ == "__main__":
     print('this is from debug_script.py, the ONLY debugging script that' +
-        'should be used!')
+          'should be used!')
     board, blocks, lasers, points, playGrid = rib.board_interpretor(
-        rib.read_bff_file("../tiny_5"), verbose=False)
+        rib.read_bff_file("../showstopper_4"), verbose=False)
     # print(playGrid)
     # print(blocks)
     # playGrid[1][5] = 'C'

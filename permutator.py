@@ -97,12 +97,7 @@ def permutator(lazor):
         permIndex = 0
         board_test = copy.deepcopy(lazor)
         board_test.playGrid = playGridPerm
-        # place the blocks according to the permutation tuple order
-        # for rowIndex in range(1, len(board_test.playGrid), 2):
-        #     for colIndex in range(1, len(board_test.playGrid[rowIndex]), 2):
-        #         if board_test.playGrid[rowIndex][colIndex] is 'o':
-        #             board_test.playGrid[rowIndex][colIndex] = perm[permIndex]
-        #             permIndex += 1
+
         print('before')
         for i in board_test.playGrid:
             print(i)

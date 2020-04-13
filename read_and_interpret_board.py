@@ -22,26 +22,23 @@ def read_bff_file(file_name):
 
     print('Hello, welcome to the gameboard reader.')
     my_file = open(file_name, "r")
-    # #a list of lists of encrypted message
+
     board_info = [i.split("\n") for i in my_file]
-    # print(board_info)
     for each_line in board_info:
         if len(each_line) > 1:
             # Remove the \n Except for last line which has no \n
             del each_line[-1]
-    # print(board_info)
+
     board_info = [i for i in board_info if i != [""]]  # remove empty spaces
-    # print(board_info)
 
     # turn from list of lists to list of strings
     board_info = [j for i in board_info for j in i]
     board_info = [i for i in board_info if i[0] != "#"]  # remove comments
     my_file.close()
-    # print(board_info)
-    return board_info  # returns list of all relevant lines
+
+    return board_info
 
 
-# , block=False, laser=False, point=False, board=False):
 def board_interpretor(board_information, verbose=False):
     '''
     This function interprets a list of input lines from read_bff_file() and
@@ -82,7 +79,6 @@ def board_interpretor(board_information, verbose=False):
     tries = 0
 
     for each_line in board_information:  # find GRID START
-            # print(each_line.lower())
         if each_line.lower() == "grid start":
 
             while tries < 1:
@@ -93,20 +89,29 @@ def board_interpretor(board_information, verbose=False):
                         break
 
                     else:
-                        # print(i)
                         board_layout.append(i.split())
-        elif each_line[0].lower() in ["a", "b", "c"] and each_line[2].isdigit():
+
+        # account for numbers of available block types
+        elif (each_line[0].lower() in ["a", "b", "c"] and
+              each_line[2].isdigit()):
+
             if each_line in board_layout:
-                pass  # Make sure board with
+                pass
                 # letters does not go in this list e.g: B o o
             else:
                 blocks.append(each_line.replace(" ", ""))
+
+        # account for laser positions and velocities
         elif each_line[0].lower() == "l":
             lasers.append(list(map(int, each_line.split()[1:])))
+
+        # account for points that must be crossed to complete the puzzle
         elif each_line[0].lower() == "p":
             points.append(tuple(list(map(int, each_line.split()[1:]))))
 
     board_layout = board_layout[1:]  # Remove Grid start that was appended
+
+    # initialize and populate playGrid
     playGrid = [["-" for col in range(2 * len(board_layout[0]) + 1)]
                 for row in range(2 * len(board_layout) + 1)]
 
@@ -120,6 +125,7 @@ def board_interpretor(board_information, verbose=False):
     for i in lasers:
         playGrid[i[1]][i[0]] = "L"
 
+    # user can choose to display all input information with verbose flag
     if verbose:
         print("blocks: " + f"{blocks}")
         print("lasers: " + f"{lasers}")
@@ -130,12 +136,4 @@ def board_interpretor(board_information, verbose=False):
             print(i)
         print('\n')
 
-    # if board==True:
     return board_layout, blocks, lasers, points, playGrid
-
-
-if __name__ == "__main__":
-    board_interpretor(read_bff_file("../numbered_6"), verbose=True)
-    print('this is from read and interpret')
-
-# ok
