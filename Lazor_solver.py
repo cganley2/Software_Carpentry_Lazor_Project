@@ -110,9 +110,13 @@ class Lazor_solver:
                     check, direction, block_type = self.collision_check(
                         current_laser)  # tuple of Bool and type of block
 
-                    if check:
+                    if check and (self.playGrid[current_laser.position[1]
+                                                ][
+                            current_laser.position[0]] is not "L" or
+                            block_type is "C"):
                         # Rotates the laser AND moves out. This is in case B
                         # kicks you out
+                        print('check is activated')
                         C_collision = current_laser.collide(
                             self, block_type, direction)
 
@@ -258,6 +262,7 @@ class Lazor_solver:
 
         # check if there is an adjacent A, B, or C block #EDGE CASE, laser in
         # left AND right
+        print(directions)
         for each_direction in directions:
             for j in each_direction:
                 # Don't know direction just that it collides or right in
@@ -318,10 +323,12 @@ class Laser():
     def collide(self, lazor, block_type, direction):
         # Update the velocity based on block type AND move it.
         if block_type == "A":
+            print('hit A')
             self.transform(direction)  # Rotate
             self.move()
             return
         elif block_type == "B":
+            print('hit B')
             # set laser arbitrarily out of bounds so that movement ends here
             self.position = (999, 0)
 

@@ -60,15 +60,15 @@ def generator(playGrid, all_block_type):
             for j in i:
                 perm_list.append(j)
 
-        for i in range(len(perm_list)):
-            for j in perm_list[i]:
-                print(j)
-            print('\n')
+        # for i in range(len(perm_list)):
+        #     for j in perm_list[i]:
+        #         print(j)
+        #     print('\n')
 
     else:
         A_populated_grid = quick_permu(playGrid, all_block_type[0])
 
-        print(A_populated_grid)
+        # print(A_populated_grid)
 
         # for i in A_populated_grid:
         #     for j in i:
