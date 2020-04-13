@@ -1,0 +1,11 @@
+# unit test for C block behavior demonstration
+
+GRID START
+o   o   o   o   o
+o   o   C   o   o
+o   o   o   o   o
+o   o   o   o   o
+o   o   o   o   o
+GRID STOP
+
+L 2 7 1 -1

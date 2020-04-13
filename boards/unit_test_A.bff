@@ -1,0 +1,13 @@
+# unit test for A block behavior demonstration
+
+GRID START
+o   o   o   o   o
+o   o   A   o   o
+o   o   o   o   o
+o   o   o   o   o
+o   o   o   o   o
+GRID STOP
+
+A 1
+
+L 2 7 1 -1

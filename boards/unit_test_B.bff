@@ -1,0 +1,11 @@
+# unit test for B block behavior demonstration
+
+GRID START
+o   o   o   o   o
+o   o   B   o   o
+o   o   o   o   o
+o   o   o   o   o
+o   o   o   o   o
+GRID STOP
+
+L 2 7 1 -1
