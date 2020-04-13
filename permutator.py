@@ -50,19 +50,36 @@ def generator(playGrid, all_block_type):
     # Order of handling blocks actually doesn't matter
     # returns B_populated grid lists if any, else original playGrid
     perm_list = []
-    B_populated_grid = quick_permu(playGrid, all_block_type[1])
-    # List of of lists of B and A populated grids
-    A_populated_grid = [quick_permu(B_grid, all_block_type[0])
-                        for B_grid in B_populated_grid]
 
-    for i in A_populated_grid:
-        for j in i:
-            perm_list.append(j)
+    if len(all_block_type) > 1:
+        B_populated_grid = quick_permu(playGrid, all_block_type[1])
+        # List of of lists of B and A populated grids
+        A_populated_grid = [quick_permu(B_grid, all_block_type[0])
+                            for B_grid in B_populated_grid]
+        for i in A_populated_grid:
+            for j in i:
+                perm_list.append(j)
 
-    for i in range(len(perm_list)):
-        for j in perm_list[i]:
-            print(j)
-        print('\n')
+        for i in range(len(perm_list)):
+            for j in perm_list[i]:
+                print(j)
+            print('\n')
+
+    else:
+        A_populated_grid = quick_permu(playGrid, all_block_type[0])
+
+        print(A_populated_grid)
+
+        # for i in A_populated_grid:
+        #     for j in i:
+        #         perm_list.append(j)
+
+        # for i in perm_list:
+        #     for j in i:
+        #         print(i)
+        #     print('\n')
+        # print(perm_list)
+    
 
     return perm_list
     #[[A_populated grids from B_populated template 1],[A_populated grids from B_populated template 2],[A_populated grids from B_populated template 3]]
@@ -91,25 +108,26 @@ def permutator(lazor):
     # # i am so efficient, wow
     # block_types =
     # Have to make a list of permu, not list of lists of grids (Sorry if that's confusing)
-    reducedPermutations = generator(lazor.playGrid, lazor.block_types)
+    reducedPermutations = generator(lazor.barePlayGrid, lazor.block_types)
 
     for playGridPerm in reducedPermutations:
         permIndex = 0
         board_test = copy.deepcopy(lazor)
         board_test.playGrid = playGridPerm
 
-        print('before')
-        for i in board_test.playGrid:
-            print(i)
-        print('\n')
+        # print('before')
+        # for i in board_test.playGrid:
+        #     print(i)
+        # print('\n')
         board_test.solver()
 
-        print('after')
-        for i in board_test.playGrid:
-            print(i)
+        # print('after')
+        # for i in board_test.playGrid:
+        #     print(i)
         win = win_condition_check(board_test)
 
         if win is True:
             break
+
     if win is not True:
         print('could not find solution')
