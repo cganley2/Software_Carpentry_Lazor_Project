@@ -17,7 +17,7 @@ To see some unit tests demonstrating how lasers interact with each type of
 block (A - reflect, B - opaque, C - refract), consider running
 unit_test_script.py.
 
-As of submission, the solver does NOT work for boards mad_1.
+As of submission, the solver does NOT work for board mad_1.
 
 OPTIONAL/BONUS RESPONSE:
 To simulate the laser moving around the grid, all the possible ways
@@ -26,5 +26,5 @@ However, using the itertools combination method would generate
 an extremely large list (On order of *number_of_free_spaces*!) for
 example 24! for mad_7. Python cannot make lists of that many items.
 So, instead we generated lists of the positions to be occupied since their
-total number doesnt change. This changed the permutation generation from
+total number doesn't change. This changed the permutation generation from
 97E6+ permutations to ~100E3 which is manageable for Python.
