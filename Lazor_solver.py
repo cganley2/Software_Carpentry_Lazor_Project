@@ -75,9 +75,12 @@ class Lazor_solver:
             current_laser = all_lasers[0]
             current_laser.x = current_laser.position[0]
             current_laser.y = current_laser.position[1]
+            
+            # if laser hits B block, exit loop bc arbitrarily out of bounds
             if current_laser.position[0] > len(self.playGrid):
                 all_lasers.pop(0)
 
+            # while laser is in bounds, continue extending it
             while (current_laser.position[0] <= (len(self.playGrid[0]) - 1) and
                    current_laser.position[1] <= (len(self.playGrid) - 1)):
 
@@ -90,6 +93,7 @@ class Lazor_solver:
                     check, direction, block_type = self.collision_check(
                         current_laser)
 
+                    # accounts for case when block is adjacent laser start
                     if check and (self.playGrid[current_laser.position[1]
                                                 ][
                             current_laser.position[0]] is not "L" or
@@ -98,6 +102,7 @@ class Lazor_solver:
                         C_collision = current_laser.collide(
                             self, block_type, direction)
 
+                        # extend laser past C block
                         if C_collision is not None:
                             if C_collision.x <= (
                                 len(self.playGrid[0]) - 1
@@ -133,7 +138,7 @@ class Lazor_solver:
                     break
 
         if C_collision is not None:
-            #Running new refracted "C" laser
+            # Running new refracted "C" laser with same rules as above
             current_laser = C_collision
             current_laser.x = current_laser.position[0]
             current_laser.y = current_laser.position[1]
@@ -224,6 +229,8 @@ class Lazor_solver:
         # X DIRECTION
         # We use a dictionary as a useful way to couple the direction
         # And the coordinates on the grid.
+        # order matters because laser will never hit left and right,
+        # but it may hit left and bottom for example
         if current_laser.x == (len(self.playGrid[0]) - 1):
             left = {"left": self.playGrid[current_laser.y
                                           ][current_laser.x - 1]}
