@@ -1,11 +1,6 @@
 import read_and_interpret_board as rib
 import numpy as np
 from copy import deepcopy
-# Current Problems: laser.x and .y don't eveolve at same rate as laser.position. Should I just make laser.x/y constant?
-#.x and .y updated during laser.move() but not during laser pop
-# When laser changes, .x and .y are not updated
-# Block C is still issue
-
 
 class Lazor_solver:
     '''
@@ -59,26 +54,27 @@ class Lazor_solver:
 
     def solver(self):
         '''
-        Docstring for solver. Nelson can describe this
+    This function simulates the laser's behavior on the grid.
+    It deflects and moves the laser around by updating the laser's
+    position and velocity.
+
+    ** Parameters **
+        self: ** Lazor_Solver Object **
+            List m x n grid of x's and o's representing the SPACES in the board
+            given by the input file
+        
+    ** Returns **
+        None
         '''
-        # Has to be up here otherwise we are re-storing
-        # all lasers in while loop each time
         all_lasers = [Laser(each_laser) for each_laser in self.lasers]
 
         C_collision = None  # C_collision is a flag for if laser hits a C block
 
         while len(all_lasers) > 0:
-            # Updates the current laser must be relating to all_laser list
-            # that we defined above
+
             current_laser = all_lasers[0]
             current_laser.x = current_laser.position[0]
             current_laser.y = current_laser.position[1]
-
-            # Once laser popped (cause met B or went outside, current laser
-            # should come back here)
-
-            # when laser encounters B, it sets position arbitrarily out of
-            # bounds, and this removes the laser
             if current_laser.position[0] > len(self.playGrid):
                 all_lasers.pop(0)
 
@@ -88,32 +84,21 @@ class Lazor_solver:
                 next_move = np.add(current_laser.position,
                                    current_laser.velocity)
 
-                # checking if next move is in grid. No need to check later.
+                # checking if next move is in grid.
                 if self.is_valid(next_move):
-                    # TODO: Laser should immediately move, an edge case is if
-                    # next_move is a block. Overaccounted for this edge case.
-                    # TODO 2: Laser should immediately move, otherwise edge
-                    # case where laer stats at edge will check everywhere and
-                    # index error will occur
 
-                    # returns true if there is collision aka right,left,
-                    # top,bottom in [a,b,c]
                     check, direction, block_type = self.collision_check(
-                        current_laser)  # tuple of Bool and type of block
+                        current_laser)
 
                     if check and (self.playGrid[current_laser.position[1]
                                                 ][
                             current_laser.position[0]] is not "L" or
                             block_type is "C"):
-                        # Rotates the laser AND moves out. This is in case B
-                        # kicks you out
+
                         C_collision = current_laser.collide(
                             self, block_type, direction)
 
                         if C_collision is not None:
-                            # path around C skips a few coordinates due to
-                            # collision errors, so these put 1s on the board
-                            # in those spots
                             if C_collision.x <= (
                                 len(self.playGrid[0]) - 1
                             ) and \
@@ -147,10 +132,8 @@ class Lazor_solver:
                     all_lasers.pop(0)
                     break
 
-            # for i in self.playGrid:
-            #     print(i)
-
-        if C_collision is not None:  # same as loop above, but for new C laser
+        if C_collision is not None:
+            #Running new refracted "C" laser
             current_laser = C_collision
             current_laser.x = current_laser.position[0]
             current_laser.y = current_laser.position[1]
@@ -163,16 +146,11 @@ class Lazor_solver:
                 next_move = np.add(current_laser.position,
                                    current_laser.velocity)
 
-                # checking if next move is in grid. No need to check later.
                 if self.is_valid(next_move):
 
                     check, direction, block_type = self.collision_check(
-                        current_laser)  # tuple of Bool and type of block
-                    # returns true if there is collision aka right,left,
-                    # top,bottom in [a,b,c]
+                        current_laser)
                     if check:
-                        # Rotates the laser AND moves out. This is in case B
-                        # kicks you out
                         C_collision = current_laser.collide(
                             self, block_type, direction)
 
@@ -189,14 +167,23 @@ class Lazor_solver:
                     self.playGrid[current_laser.position[1]
                                   ][current_laser.position[0]] = "1"
                     break
-                # Go to next laser. break or not
 
-            # for i in self.playGrid:
-            #     print(i)
 
     def is_valid(self, move):
         '''
-        Checks if proposed move is valid i.e. in bounds
+    This function determines whether a laser's move
+    is valid(within the board).
+
+    ** Parameters **
+        self: * Lazor_Solver Object *
+            List m x n grid of x's and o's representing the SPACES in the board
+            given by the input file
+        move: *list* *int*
+            This is the coordinates of the next move of the laser
+            in the form [x,y]        
+    ** Returns **
+        True or False: *Bool*
+            Returns true if the move is within the grid else, false.
         '''
         if (
             (move[0] <= (len(self.playGrid[0]) - 1)) and
@@ -209,15 +196,34 @@ class Lazor_solver:
 
     def collision_check(self, current_laser):  # New one
         '''
-        Once checked if next move is valid, this function checks if the laser
-        has hit a block and adjusts its path accordingly
+    This function determines whether a laser's move
+    is valid(within the board).
+
+    ** Parameters **
+        self: ** Lazor_Solver Object **
+            List m x n grid of x's and o's representing the SPACES in the board
+            given by the input file
+        current_laser: **Laser Object**
+            This is the laser that is being checked.        
+    ** Returns **
+        True or False: **Bool**
+            Returns true if the move is within the grid else, false.
+        direction: **str**
+            Returns the direction so that the laser rotater knows
+            how to update the velocity/direction of the laser after
+            a collision.
+        each_directions.get(direction): **str**
+            Returns the corresponding block to the direction.
+            For example an A-block is on left so returns "A"
+        None: **NoneType**
+            If there is no collision.
         '''
-        # Order is important, it will never hit a top and left but may hit
-        # left and right
+
         directions = []
 
-        # adjust possible check directions to account for edge cases
         # X DIRECTION
+        # We use a dictionary as a useful way to couple the direction
+        # And the coordinates on the grid.
         if current_laser.x == (len(self.playGrid[0]) - 1):
             left = {"left": self.playGrid[current_laser.y
                                           ][current_laser.x - 1]}
@@ -255,19 +261,12 @@ class Lazor_solver:
             directions.append(top)
             directions.append(bottom)
 
-        # check if there is an adjacent A, B, or C block #EDGE CASE, laser in
-        # left AND right
         for each_direction in directions:
-            for j in each_direction:
-                # Don't know direction just that it collides or right in
-                # {'A', 'B', 'C'} or top in {'A', 'B', 'C'} or bottom in
-                # {'A', 'B', 'C'}:
-                if each_direction.get(j) in {'A', 'B', 'C'}:
-                    # returns tuple #j is the direction str, direction.get(i)
-                    # is the block
-                    return True, j, each_direction.get(j)
+            for dir_name in each_direction:
+                if each_direction.get(dir_name) in {"A", "B", "C"}:
+                    return True, dir_name, each_direction.get(dir_name)
 
-        # Returning 3 things because we unpack 3 outputs for the collide_check
+        # Returning 3 items because we unpack 3 outputs for the collide_check
         return False, None, None
 
 
@@ -291,9 +290,33 @@ class Block():
 
 class Laser():
     '''
-    Class for moving laser with support for collisions with placeable blocks
-    and transforming velocities accordingly
-    '''
+    The Laser class represents a laser that moves around
+    the playgrid.
+
+    ** Attributes **
+        x: *int*
+            positive x direction in grid.
+        y: *int*
+            positive y direction in grid.
+        vx: *int*
+            Velocity in x direction the sign of this
+            parameter dictates where the laser moves.
+            -1 or 1.
+        vy: *int*
+            Velocity in y direction the sign of this
+            parameter dictates where the laser moves.
+            -1 or 1.
+        start:  *tuple* *int*
+            Conains the start of the laser in an immutable
+            tuple.
+        position: *list* *int*
+            Contains the x and y position of the laser.
+        velocity: *list* *int*
+            Contains the x and y velocities.
+
+    ** Returns **
+        None
+        '''
 
     def __init__(self, laser_attributes):
 
@@ -315,9 +338,32 @@ class Laser():
         return
 
     def collide(self, lazor, block_type, direction):
-        # Update the velocity based on block type AND move it.
+        '''
+        This function wraps the movement and rotation
+        of a laser after it collides on a type of
+        block.
+
+        ** Parameters **
+            self: ** Laser Object**
+                Laser to undergo collision.
+            lazor: *Lazor_Solver Object**
+                The solver object is needed in order
+                to have access to the playgrid and update
+                with the laser's movement denoted by "1"
+            block_type: *str*
+                This is the blocktype upon which collision
+                will occur.  
+            direction: *str*
+                The direction (left,right,top,bottom) that
+                relative to the laser, where the collision
+                is occuring.      
+        ** Returns **
+            new_laser: *Laser Object*
+                If a C block is hit, then a new,
+                refracted laser will be created and returned
+        '''
         if block_type == "A":
-            self.transform(direction)  # Rotate
+            self.transform(direction)
             self.move()
             return
         elif block_type == "B":
@@ -325,9 +371,6 @@ class Laser():
             self.position = (999, 0)
 
         elif block_type == "C":
-            # create new laser object in same position as when the laser hit
-            # the C block, return to solver() with velocity before transform()
-            # is called
             new_laser_obj = deepcopy(self)
             # need to move twice so that collision_checker() does not see
             # the same block over and over
@@ -344,12 +387,18 @@ class Laser():
 
     def transform(self, direction):
         '''
-        Transform updates ONLY the velocity of a laser.
+        This rotates the laser depending on which direction
+        it is hitting either an A or C block. It does this
+        by changin its velocity vx and vy.
+
+        ** Parameters **
+            self: * Laser Object*
+                Laser to be rotated.
+            direction: *str*
+                This is the direction the laser is hit from.        
+        ** Returns **
+            None
         '''
-
-        # If you hit the box horizontally (left or right) you multiply x by -1
-        # if you hit the box vertically (top, bottom) you multiply y by -1
-
         if direction in ("left", "right"):
             self.velocity[0] = -1 * self.velocity[0]
         else:

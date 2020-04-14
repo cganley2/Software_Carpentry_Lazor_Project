@@ -20,7 +20,7 @@ def read_bff_file(file_name):
     if ".bff" not in file_name:
         file_name += ".bff"  # Adds extension to open file with .bff extension.
 
-    print('Hello, welcome to the gameboard reader.')
+    print("Hello, welcome to the gameboard reader.")
     my_file = open(file_name, "r")
 
     board_info = [i.split("\n") for i in my_file]
@@ -134,6 +134,6 @@ def board_interpretor(board_information, verbose=False):
         print("playGrid: ")
         for i in playGrid:
             print(i)
-        print('\n')
+        print("\n")
 
     return board_layout, blocks, lasers, points, playGrid

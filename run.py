@@ -4,7 +4,7 @@ from permutator import permutator
 
 if __name__ == '__main__':
 
-    board_path = 'boards/mad_1'
+    board_path = 'boards/mad_7'
 
     board, blocks, lasers, points, playGrid = rib.board_interpretor(
         rib.read_bff_file(board_path), verbose=True)
