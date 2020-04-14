@@ -1,0 +1,2 @@
+# this file is so that the solutions/ directory does not get deleted on the
+# remote repository LOL
